@@ -1,0 +1,51 @@
+@font-face {
+    font-family: 'Minecraft';
+    src: url(fonts/MinecraftSeven.otf);
+}
+
+body {
+		font-family: "Minecraft";
+		color: #FFFFFF;
+}
+
+p {
+	margin: 0;
+	padding: 0;
+}
+
+#minimap {
+	border-radius: 105px;
+}
+
+#minimap-layout {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	
+	text-align: center;
+
+	border-radius: 200px;
+}
+
+#minimap-frame {
+	border: 4px solid #4C4C4C;
+	box-shadow: inset 0px 0px 2px #000000;
+	border-radius: 200px;
+}
+
+#coord {
+	margin: 0 auto;
+	display: block;
+
+	width: 100%;
+
+	text-align: center;
+	text-shadow: 2px 2px 0px #000000;
+}
+
+#player-indicator {
+	position: absolute;
+
+	top: 102px;
+	right: 104px;
+}

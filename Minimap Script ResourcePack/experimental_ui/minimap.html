@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv='Content-type' content='text/html; charset=utf-8' />
+	<script src='UIEngine.js'></script>
+	<link rel='stylesheet' href='styles.css' />
+</head>
+
+<body id='_body_'>
+	<div class='screenBox'>
+		<div id='minimap-layout'>
+			<div id='minimap-frame' style='width: 218px; height: 218px;'>
+				<canvas id='minimap' width=210px height=210px style='width: 210px; height: 210px;'></canvas>
+				<img id='player-indicator' src='./indicator_player.png'></img>
+			</div>
+			<p id='coord'>x, y, z</p>
+		</div>
+	</div>
+</body>
+
+<script type='text/javascript'>
+	const SIZE = 210
+	const HALF = 105
+	const COUNT = 21
+	const ratio = Math.floor(SIZE / COUNT)
+
+	let canvas = document.getElementById('minimap')
+	let coord = document.getElementById('coord')
+
+	let ctx = canvas.getContext('2d')
+	ctx.setTransform(1, 0, 0, 1, 0, 0)
+
+	let scriptInterface = null
+
+	engine.on('facet:updated:core.scripting', interface => {
+		scriptInterface = interface
+	})
+
+	engine.trigger('facet:request', ['core.scripting'])
+
+	/**
+	 * block updated
+	 * @param data {String[]}
+	*/
+	engine.on('update_minimap', data => {
+		data = JSON.parse(data)
+		let str = data.data_str.split('')
+		let yaw = (-Number(data.yaw) - 90) * Math.PI / 180 // radian
+		
+		ctx.clearRect(0, 0, SIZE, SIZE)
+		ctx.save()
+
+		ctx.translate(HALF, HALF)
+		ctx.rotate(yaw)
+		ctx.translate(-HALF, -HALF)
+
+		for (let i in str) {
+			ctx.fillStyle = colorize(Number(str[i]))
+			ctx.fillRect((i % 21) * ratio, Math.floor(i / 21) * ratio, ratio, ratio)
+		}
+
+		/*ctx.font = '24px Minecraft'
+		ctx.fillStyle = '#FFFFFF'
+		ctx.textAlign = 'center'
+		ctx.fillText('E', HALF + HALF * Math.cos(yaw), HALF + HALF * Math.sin(yaw))
+		ctx.fillText('N', HALF + HALF * Math.cos(yaw + 0.5 * Math.PI), HALF + HALF * Math.sin(yaw + 0.5 * Math.PI))
+		ctx.fillText('W', HALF + HALF * Math.cos(yaw + Math.PI), HALF + HALF * Math.sin(yaw + Math.PI))
+		ctx.fillText('S', HALF + HALF * Math.cos(yaw + 1.5 * Math.PI), HALF + HALF * Math.sin(yaw + 1.5 * Math.PI))*/
+
+		ctx.restore()
+	})
+
+	engine.on('update_coord', data => {
+		data = JSON.parse(data)
+
+		coord.innerHTML = data.x + ', ' + data.y + ', ' + data.z
+	})
+
+	function showMessage(message) {
+		let option = {
+			id: 'debug_show_message',
+			data: {
+				message: message
+			}
+		}
+		scriptInterface.tirgger(JSON.stringify(option))
+	}
+
+	function colorize(state) {
+		switch (state) {
+			case 0:
+				return '#7FB238'
+			case 1:
+				return '#707070'
+			case 2:
+				return '#F7E9A3'
+			case 3:
+				return '#976D4D'
+			case 4:
+				return '#4040FF'
+			default:
+				return '#FFFFFF'
+		}
+	}
+</script>
+
+</html>
