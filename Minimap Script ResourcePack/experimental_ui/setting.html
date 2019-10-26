@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv='Content-type' content='text/html; charset=utf-8' />
+	<script src='UIEngine.js'></script>
+
+	<link rel='stylesheet' href='minecraft.css' />
+	<link rel='stylesheet' href='setting.css' />
+</head>
+
+<body id='_body_'>
+	<div class='screenBox dim'>
+		<div class='header'>
+			Minimap Option (Test)
+		</div>
+		<div class='box'>
+			<table>
+				<tr>
+					<td>Minimap Size</td><td>10</td>
+				</tr>
+				<tr>
+					<td>Setting Open Key</td><td>M</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
+
+<script type='text/javascript'>
+	const DEBUG = true
+
+	let scriptInterface = null
+
+	engine.on('facet:updated:core.scripting', interface => {
+		scriptInterface = interface
+	})
+
+	engine.trigger('facet:request', ['core.scripting'])
+
+	this.addEventListener('keydown', event => {
+		switch (event.keyCode) {
+			case 27:
+				let option = {
+					id: 'close_setting',
+					data: {}
+				}
+
+				scriptInterface.triggerEvent(JSON.stringify(option))
+				break
+		}
+	})
+
+	function showMessage(message) {
+		let option = {
+			id: 'debug_show_message',
+			data: {
+				message: message
+			}
+		}
+		scriptInterface.triggerEvent(JSON.stringify(option))
+	}
+</script>
+
+</html>

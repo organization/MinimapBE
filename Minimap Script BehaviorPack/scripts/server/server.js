@@ -33,7 +33,7 @@ let tickingArea = null
 
 function getBlocks(tickingArea, x, y, z) {
   let size = 10
-  let ysize = 4
+  let ysize = 3
   let result = ''
   for (let xi = size; xi > -size; xi--) {
     for (let zi = -size; zi < size; zi++) {
@@ -127,10 +127,31 @@ serverSystem.showMessage = function (message) {
  */
 function normalize(array) {
   let result = ''
+  // let open = false
 
   for (let x in array) {
     for (let z in array[x][0]) {
-      result += colorize(array[20 - x][0][z].__identifier__)
+      let code = colorize(array[20 - x][0][z].__identifier__)
+      result += code
+      /*if (open) {
+        let str = result.split('[')
+        let c1 = str[str.length - 1]
+        let num = str[str.length - 2]
+
+        if (code == c1) {
+          str.pop()
+          str.push(num + 1)
+          result = str.join('[')
+        } else {
+          open = false
+          result += ']' + code
+        }
+      } else if (code == result[result.length - 1]) {
+        open = true
+        result += '[2'
+      } else {
+        result += code
+      }*/
     }
   }
 

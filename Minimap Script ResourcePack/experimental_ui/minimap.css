@@ -1,18 +1,3 @@
-@font-face {
-    font-family: 'Minecraft';
-    src: url(fonts/MinecraftSeven.otf);
-}
-
-body {
-		font-family: "Minecraft";
-		color: #FFFFFF;
-}
-
-p {
-	margin: 0;
-	padding: 0;
-}
-
 #minimap {
 	border-radius: 105px;
 }
@@ -33,19 +18,30 @@ p {
 	border-radius: 200px;
 }
 
-#coord {
-	margin: 0 auto;
-	display: block;
-
-	width: 100%;
-
-	text-align: center;
-	text-shadow: 2px 2px 0px #000000;
-}
-
 #player-indicator {
 	position: absolute;
 
 	top: 102px;
 	right: 104px;
+}
+
+.bright {
+	width: 100%;
+	height: 100%;
+
+	background: rgba(0, 0, 0, 0.75);
+
+	animation-name: brighten;
+	animation-duration: 0.5s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes brighten {
+  0% {
+		background: rgba(0, 0, 0, 0.75);
+  }
+  
+  100% {
+		background: rgba(0, 0, 0, 0.0);
+ }
 }

@@ -4,26 +4,26 @@
         "description": "Minimap Script v1.12.0 by SuYong",
         "name": "Minimap Script",
         "uuid": "2c542f65-61a3-4522-9096-b133952df560",
-        "version": [0, 0, 1]
+        "version": [0, 1, 0]
     },
     "modules": [
         {
            "description": "Minimap Behavior Pack Module",
            "type": "data",
            "uuid": "881768b5-026e-4676-b2df-d62386abdf17",
-           "version": [0, 0, 1]
+           "version": [0, 1, 0]
        },
         {
             "description": "Minimap Script Module",
             "type": "client_data",
             "uuid": "9473698c-4cc4-4f60-aaf1-bd12f5439c42",
-            "version": [0, 0, 1]
+            "version": [0, 1, 0]
         }
     ],
     "dependencies": [
         {
             "uuid": "52da0d84-d756-48a7-b4ad-7be4aba853f5",
-            "version": [0, 0, 1]
+            "version": [0, 1, 0]
         }
     ]
 }

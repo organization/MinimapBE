@@ -10,7 +10,7 @@ clientSystem.initialize = function () {
   this.listenForEvent('minecraft:client_entered_world', event => this.onWorldLoaded(event.data.player))
 
 
-  if(DEBUG) {
+  if (DEBUG) {
     let debug_config = this.createEventData('minecraft:script_logger_config')
     debug_config.data.log_errors = true
     debug_config.data.log_warnings = true
@@ -29,7 +29,7 @@ clientSystem.update = function () {
 clientSystem.onUpdateBlock = function (blocks, yaw) {
   let eventData = this.createEventData('minecraft:send_ui_event')
   eventData.data.eventIdentifier = 'update_minimap'
-  
+
   let data = {
     data_str: blocks,
     yaw: yaw
@@ -42,11 +42,11 @@ clientSystem.onUpdateBlock = function (blocks, yaw) {
 clientSystem.onUpdateCoord = function (x, y, z) {
   let eventData = this.createEventData('minecraft:send_ui_event')
   eventData.data.eventIdentifier = 'update_coord'
-  
+
   let data = {
     x: (x > 0 ? '+' : '') + Math.round(x),
     y: Math.round(y),
-    z:(z > 0 ? '+' : '') +  Math.round(z)
+    z: (z > 0 ? '+' : '') + Math.round(z)
   }
   eventData.data.data = JSON.stringify(data)
 
@@ -54,7 +54,33 @@ clientSystem.onUpdateCoord = function (x, y, z) {
 }
 
 clientSystem.onWorldLoaded = function (player) {
-  let loadData = this.createEventData('minecraft:load_ui')
+  showMinimap()
+
+  this.showMessage('Minimap Add-ons by SuYong')
+}
+
+clientSystem.onDestryBlock = function (event) {
+
+}
+
+clientSystem.onUIEvent = function (id, data) {
+  switch (id) {
+    case 'debug_show_message':
+      this.showMessage(data.message)
+      break
+    case 'open_setting':
+      dismissMinimap()
+      showSetting()
+      break
+    case 'close_setting':
+      dismissSetting()
+      showMinimap()
+      break
+  }
+}
+
+function showMinimap() {
+  let loadData = clientSystem.createEventData('minecraft:load_ui')
   loadData.data.path = 'minimap.html'
   loadData.data.options = {
     always_accepts_input: false,
@@ -68,20 +94,39 @@ clientSystem.onWorldLoaded = function (player) {
     render_only_when_topmost: false,
   }
 
-  this.broadcastEvent('minecraft:load_ui', loadData)
-  this.showMessage('Minimap Add-ons by SuYong')
+  clientSystem.broadcastEvent('minecraft:load_ui', loadData)
 }
 
-clientSystem.onDestryBlock = function (event) {
+function showSetting() {
+  let loadData = clientSystem.createEventData('minecraft:load_ui')
+  loadData.data.path = 'setting.html'
+  loadData.data.options = {
+    always_accepts_input: true,
 
-}
+    render_game_behind: true,
+    absorbs_input: true,
+    is_showing_menu: true,
+    should_steal_mouse: false,
+    force_render_below: false,
 
-clientSystem.onUIEvent = function(id, data) {
-  switch(id) {
-    case 'debug_show_message':
-      this.showMessage(data.message)
-      break
+    render_only_when_topmost: false,
   }
+
+  clientSystem.broadcastEvent('minecraft:load_ui', loadData)
+}
+
+function dismissMinimap() {
+  let data = clientSystem.createEventData('minecraft:unload_ui')
+  data.data.path = 'minimap.html'
+
+  clientSystem.broadcastEvent('minecraft:unload_ui', data)
+}
+
+function dismissSetting() {
+  let data = clientSystem.createEventData('minecraft:unload_ui')
+  data.data.path = 'setting.html'
+
+  clientSystem.broadcastEvent('minecraft:unload_ui', data)
 }
 
 // Custom Funcitons --------------------------------------------------
