@@ -3,8 +3,11 @@ const DEBUG = true
 const clientSystem = client.registerSystem(0, 0)
 
 clientSystem.initialize = function () {
-  this.listenForEvent('minimap:update_block', event => this.onUpdateBlock(event.data.blocks, event.data.yaw))
-  this.listenForEvent('minimap:update_coord', event => this.onUpdateCoord(event.data.x, event.data.y, event.data.z, event.data.yaw))
+  this.registerEventData('minimap:client_loaded', { nothing: null }) // without parameter, script crashed
+
+  this.listenForEvent('minimap:update_block', event => this.onUpdateBlock(event.data.blocks, event.data.name))
+  this.listenForEvent('minimap:update_coord', event => this.onUpdateCoord(event.data.x, event.data.y, event.data.z, event.data.yaw, event.data.name))
+  this.listenForEvent('minimap:player_entered', event => this.onClientPlayer(event.data.player, event.data.name))
 
   this.listenForEvent('minecraft:ui_event', event => this.onUIEvent(JSON.parse(event.data).id, JSON.parse(event.data).data))
   this.listenForEvent('minecraft:client_entered_world', event => this.onWorldLoaded(event.data.player))
@@ -20,13 +23,22 @@ clientSystem.initialize = function () {
   }
 }
 
+// Define variables --------------------------------------------------
+
+let ME = null
+let NAME = ''
+
 // Hooks --------------------------------------------------
 
 clientSystem.update = function () {
 
 }
 
-clientSystem.onUpdateBlock = function (blocks, yaw) {
+clientSystem.onUpdateBlock = function (blocks, name) {
+  if(NAME != name) {
+    return
+  }
+
   let eventData = this.createEventData('minecraft:send_ui_event')
   eventData.data.eventIdentifier = 'update_minimap'
 
@@ -36,7 +48,11 @@ clientSystem.onUpdateBlock = function (blocks, yaw) {
   this.broadcastEvent('minecraft:send_ui_event', eventData)
 }
 
-clientSystem.onUpdateCoord = function (x, y, z, yaw) {
+clientSystem.onUpdateCoord = function (x, y, z, yaw, name) {
+  if(NAME != name) {
+    return
+  }
+
   let eventData = this.createEventData('minecraft:send_ui_event')
   eventData.data.eventIdentifier = 'update_coord'
 
@@ -48,7 +64,18 @@ clientSystem.onUpdateCoord = function (x, y, z, yaw) {
 clientSystem.onWorldLoaded = function (player) {
   showMinimap()
 
+  let event = this.createEventData('minimap:client_loaded')
+  event.data.nothing = null 
+  this.broadcastEvent('minimap:client_loaded', event)
+
   this.showMessage('Minimap Add-ons by SuYong')
+}
+
+clientSystem.onClientPlayer = function (player, name) {
+  if (NAME == '' || ME == null) {
+    ME = player
+    NAME = name
+  }
 }
 
 clientSystem.onDestryBlock = function (event) {

@@ -3,9 +3,12 @@ const DEBUG = true
 const serverSystem = server.registerSystem(0, 0)
 
 serverSystem.initialize = function () {
-  this.registerEventData('minimap:update_block', { blocks: [] })
-  this.registerEventData('minimap:update_coord', { x: 0, y: 0, z: 0, yaw: 0 })
+  this.registerEventData('minimap:update_block', { blocks: '', name: '' })
+  this.registerEventData('minimap:update_coord', { x: 0, y: 0, z: 0, yaw: 0, name: '' })
   this.registerEventData('minimap:entity_created', { position: [], entity: null })
+  this.registerEventData('minimap:player_entered', { player: null, name: '' })
+
+  this.listenForEvent('minimap:client_loaded', event => this.onClientLoaded())
 
   this.listenForEvent('minecraft:entity_created', event => this.onEntityCreated(event.data.entity))
   this.listenForEvent('minecraft:entity_tick', event => this.onEntityTicked(event.data.entity))
@@ -39,7 +42,7 @@ function getBlocks(tickingArea, x, y, z) {
     for (let zi = -size; zi < size; zi++) {
       yloop: for (let yi = ysize; yi > -ysize; yi--) {
         let block = serverSystem.getBlock(tickingArea, x + xi, y + yi, z + zi).__identifier__
-        if(block != 'minecraft:air') {
+        if (block != 'minecraft:air') {
           result += colorize(block)
           break yloop
         }
@@ -62,32 +65,35 @@ rotation y
 // Hooks --------------------------------------------------
 
 serverSystem.update = function () {
-  if (players.length > 0) {
-    let pos = this.getComponent(players[0], 'minecraft:position').data
+  for (let i in players) {
+    let pos = this.getComponent(players[i], 'minecraft:position').data
     if (tickingArea == null) {
-      tickingArea = this.getComponent(players[0], 'minecraft:tick_world').data.ticking_area
+      tickingArea = this.getComponent(players[i], 'minecraft:tick_world').data.ticking_area
     }
 
     let eventCoord = this.createEventData('minimap:update_coord')
-      
+
     eventCoord.data.x = pos.x
     eventCoord.data.y = pos.y
     eventCoord.data.z = pos.z
-    eventCoord.data.yaw = this.getComponent(players[0], 'minecraft:rotation').data.y
+    eventCoord.data.yaw = this.getComponent(players[i], 'minecraft:rotation').data.y
+    eventCoord.data.name = this.getComponent(players[i], 'minecraft:nameable').data.name
 
     this.broadcastEvent('minimap:update_coord', eventCoord)
 
     if (cool <= 0) {
       let event = this.createEventData('minimap:update_block')
-      //event.data.blocks = getBlocks(tickingArea, pos.x, pos.y - 1, pos.z)
+
       event.data.blocks = normalize(this.getBlocks(tickingArea, pos.x - 10, pos.y - 1, pos.z - 10, pos.x + 10, pos.y - 1, pos.z + 10))
-      
+      event.data.name = this.getComponent(players[i], 'minecraft:nameable').data.name
+
       this.broadcastEvent('minimap:update_block', event)
-
-      cool = 20
     }
+  }
 
-    cool--
+  cool--
+  if (cool < 0) {
+    cool = 20
   }
 }
 
@@ -96,7 +102,7 @@ serverSystem.update = function () {
  * @param entity {Entity}
  */
 serverSystem.onEntityTicked = function (entity) {
-  
+
 }
 
 /**
@@ -106,7 +112,20 @@ serverSystem.onEntityTicked = function (entity) {
 serverSystem.onEntityCreated = function (entity) {
   if (entity.__identifier__ == 'minecraft:player') {
     players.push(entity)
+    this.showMessage('add player : ' + players.lenegth)
   }
+}
+
+/**
+ * new player loaded
+ */
+serverSystem.onClientLoaded = function () {
+  let event = this.createEventData('minimap:player_entered')
+
+  event.data.player = players[players.length - 1]
+  event.data.name = this.getComponent(players[players.length - 1], 'minecraft:nameable').data.name
+
+  this.broadcastEvent('minimap:player_entered', event)
 }
 
 // Custom Funcitons --------------------------------------------------
@@ -165,16 +184,21 @@ function normalize(array) {
  * @return colorCode {Number}
  */
 function colorize(name) {
-  switch (name) {
-    case 'minecraft:grass':
+  switch (name.split(':')[1]) {
+    case 'grass': case 'slime':
       return 0//'#7FB238'
-    case 'minecraft:stone': case 'minecraft:cobblestone':
+    case 'stone': case 'cobblestone': case 'mossy_cobblestone':
+    case 'stone_slab': case 'double_stone_slab': case 'mossy_cobblestone_slab': case 'double_mossy_cobblestone_slab':
+    case 'stone_stairs': case 'andesite_stairs': case 'normal_stone_stairs':
+    case 'bedrock':
+    case 'gold_ore': case 'iron_ore': case 'coal_ore': case 'lapis_ore':
+    case 'dispenser':
       return 1//'#707070'
-    case 'minecraft:sand':
+    case 'sand':
       return 2//'#F7E9A3'
-    case 'minecraft:dirt':
+    case 'dirt':
       return 3//'#976D4D'
-    case 'minecraft:water':
+    case 'water': case 'kelp': case 'seagrass':
       return 4//'#4040FF'
     default:
       return 5//'#FFFFFF'

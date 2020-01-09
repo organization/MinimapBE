@@ -65,8 +65,8 @@
 		ctx.clearRect(0, 0, SIZE, SIZE)
 		ctx.save()
 
-		let errorx = Math.floor(minimapData.x) - minimapData.old.x
-		let errorz = Math.floor(minimapData.z) - minimapData.old.z
+		let errorx = minimapData.x - minimapData.old.x
+		let errorz = minimapData.z - minimapData.old.z
 
 		ctx.translate(HALF, HALF)
 		ctx.rotate(minimapData.yaw)
@@ -137,9 +137,6 @@
 				}
 				scriptInterface.triggerEvent(JSON.stringify(option))
 				break
-		}
-		if (DEBUG) {
-			debug_div.innerHTML = 'KeyCode: ' + event.keyCode
 		}
 	})
 
