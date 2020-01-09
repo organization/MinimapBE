@@ -4,7 +4,7 @@ const serverSystem = server.registerSystem(0, 0)
 
 serverSystem.initialize = function () {
   this.registerEventData('minimap:update_block', { blocks: [] })
-  this.registerEventData('minimap:update_coord', { x: 0, y: 0, z: 0 })
+  this.registerEventData('minimap:update_coord', { x: 0, y: 0, z: 0, yaw: 0 })
   this.registerEventData('minimap:entity_created', { position: [], entity: null })
 
   this.listenForEvent('minecraft:entity_created', event => this.onEntityCreated(event.data.entity))
@@ -68,22 +68,23 @@ serverSystem.update = function () {
       tickingArea = this.getComponent(players[0], 'minecraft:tick_world').data.ticking_area
     }
 
+    let eventCoord = this.createEventData('minimap:update_coord')
+      
+    eventCoord.data.x = pos.x
+    eventCoord.data.y = pos.y
+    eventCoord.data.z = pos.z
+    eventCoord.data.yaw = this.getComponent(players[0], 'minecraft:rotation').data.y
+
+    this.broadcastEvent('minimap:update_coord', eventCoord)
+
     if (cool <= 0) {
       let event = this.createEventData('minimap:update_block')
       //event.data.blocks = getBlocks(tickingArea, pos.x, pos.y - 1, pos.z)
       event.data.blocks = normalize(this.getBlocks(tickingArea, pos.x - 10, pos.y - 1, pos.z - 10, pos.x + 10, pos.y - 1, pos.z + 10))
-      event.data.yaw = this.getComponent(players[0], 'minecraft:rotation').data.y
-
+      
       this.broadcastEvent('minimap:update_block', event)
 
-      let eventCoord = this.createEventData('minimap:update_coord')
-      
-      eventCoord.data.x = pos.x
-      eventCoord.data.y = pos.y
-      eventCoord.data.z = pos.z
-      
-      this.broadcastEvent('minimap:update_coord', eventCoord)
-      cool = 4
+      cool = 20
     }
 
     cool--

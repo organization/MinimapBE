@@ -4,7 +4,7 @@ const clientSystem = client.registerSystem(0, 0)
 
 clientSystem.initialize = function () {
   this.listenForEvent('minimap:update_block', event => this.onUpdateBlock(event.data.blocks, event.data.yaw))
-  this.listenForEvent('minimap:update_coord', event => this.onUpdateCoord(event.data.x, event.data.y, event.data.z))
+  this.listenForEvent('minimap:update_coord', event => this.onUpdateCoord(event.data.x, event.data.y, event.data.z, event.data.yaw))
 
   this.listenForEvent('minecraft:ui_event', event => this.onUIEvent(JSON.parse(event.data).id, JSON.parse(event.data).data))
   this.listenForEvent('minecraft:client_entered_world', event => this.onWorldLoaded(event.data.player))
@@ -30,25 +30,17 @@ clientSystem.onUpdateBlock = function (blocks, yaw) {
   let eventData = this.createEventData('minecraft:send_ui_event')
   eventData.data.eventIdentifier = 'update_minimap'
 
-  let data = {
-    data_str: blocks,
-    yaw: yaw
-  }
+  let data = { data_str: blocks }
   eventData.data.data = JSON.stringify(data)
 
   this.broadcastEvent('minecraft:send_ui_event', eventData)
 }
 
-clientSystem.onUpdateCoord = function (x, y, z) {
+clientSystem.onUpdateCoord = function (x, y, z, yaw) {
   let eventData = this.createEventData('minecraft:send_ui_event')
   eventData.data.eventIdentifier = 'update_coord'
 
-  let data = {
-    x: (x > 0 ? '+' : '') + Math.round(x),
-    y: Math.round(y),
-    z: (z > 0 ? '+' : '') + Math.round(z)
-  }
-  eventData.data.data = JSON.stringify(data)
+  eventData.data.data = JSON.stringify({ x: x, y: y, z: z, yaw: yaw })
 
   this.broadcastEvent('minecraft:send_ui_event', eventData)
 }

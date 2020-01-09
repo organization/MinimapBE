@@ -38,31 +38,36 @@
 
 	let scriptInterface = null
 
-	engine.on('facet:updated:core.scripting', interface => {
-		scriptInterface = interface
-	})
+	let minimapData = {
+		mapData: [],
+		yaw: 0,
+		x: 0,
+		y: 0,
+		z: 0,
+		old: {
+			x: 0,
+			z: 0
+		}
+	}
 
-	engine.trigger('facet:request', ['core.scripting'])
-
-	/**
-	 * block updated
-	 * @param data {String[]}
-	*/
-	engine.on('update_minimap', data => {
-		data = JSON.parse(data)
-		let str = data.data_str.split('')
-
-		let yaw = (-Number(data.yaw) - 90) * Math.PI / 180 // radian
-
+	let renderMinimap = function () {
 		ctx.clearRect(0, 0, SIZE, SIZE)
 		ctx.save()
 
+		let errorx = Math.floor(minimapData.x) - minimapData.old.x
+		let errorz = Math.floor(minimapData.z) - minimapData.old.z
+
 		ctx.translate(HALF, HALF)
-		ctx.rotate(yaw)
+		ctx.rotate(minimapData.yaw)
+
+		ctx.rotate(90 * Math.PI / 180)
+		ctx.translate(errorx * ratio, errorz * ratio)
+		ctx.rotate(-90 * Math.PI / 180)
+
 		ctx.translate(-HALF, -HALF)
 
 		let c = 0
-		for (let i in str) {
+		for (let i in minimapData.mapData) {
 			/*if(i % 2 == 0) { // color code
 				for (let j in str[i]) {
 					ctx.fillStyle = colorize(Number(str[i][j]))
@@ -76,7 +81,7 @@
 				ctx.fillRect()
 			}
 			*/
-			ctx.fillStyle = colorize(Number(str[i]))
+			ctx.fillStyle = colorize(Number(minimapData.mapData[i]))
 			ctx.fillRect((i % 21) * ratio, Math.floor(i / 21) * ratio, ratio, ratio)
 		}
 
@@ -89,12 +94,38 @@
 		ctx.fillText('S', HALF + HALF * Math.cos(yaw + 1.5 * Math.PI), HALF + HALF * Math.sin(yaw + 1.5 * Math.PI))*/
 
 		ctx.restore()
+	}
+
+	setInterval(renderMinimap, 1)
+
+	engine.on('facet:updated:core.scripting', interface => {
+		scriptInterface = interface
+	})
+
+	engine.trigger('facet:request', ['core.scripting'])
+
+	/**
+	 * block updated
+	 * @param data {String[]}
+	*/
+	engine.on('update_minimap', data => {
+		data = JSON.parse(data)
+
+		minimapData.old.x = Math.floor(minimapData.x)
+		minimapData.old.z = Math.floor(minimapData.z)
+
+		minimapData.mapData = data.data_str.split('')
 	})
 
 	engine.on('update_coord', data => {
 		data = JSON.parse(data)
 
-		coord.innerHTML = data.x + ', ' + data.y + ', ' + data.z
+		minimapData.yaw = (-Number(data.yaw) - 90) * Math.PI / 180 // radian
+		minimapData.x = data.x
+		minimapData.y = data.y
+		minimapData.z = data.z
+
+		coord.innerHTML = ((data.x > 0 ? '+' : '') + Math.round(data.x)) + ', ' + Math.round(data.y) + ', ' + ((data.z > 0 ? '+' : '') + Math.round(data.z))
 	})
 
 	this.addEventListener('keydown', event => {
