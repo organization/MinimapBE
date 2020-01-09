@@ -9,7 +9,7 @@
 </head>
 
 <body id='_body_'>
-	<div class='screenBox bright'>
+	<div class='screenBox'>
 		<div id='minimap-layout'>
 			<div id='minimap-frame' style='width: 218px; height: 218px;'>
 				<canvas id='minimap' width=210px height=210px style='width: 210px; height: 210px;'></canvas>
@@ -17,6 +17,10 @@
 				<p id='coord'>x, y, z</p>
 				<p id='debug'></p>
 			</div>
+			<div id='N' class='direction'>N</div>
+			<div id='E' class='direction'>E</div>
+			<div id='W' class='direction'>W</div>
+			<div id='S' class='direction'>S</div>
 		</div>
 	</div>
 </body>
@@ -29,9 +33,16 @@
 	const COUNT = 21
 	const ratio = Math.floor(SIZE / COUNT)
 
+	const BIAS = 6
+
 	let canvas = document.getElementById('minimap')
 	let coord = document.getElementById('coord')
 	let debug_div = document.getElementById('debug')
+
+	let Ndiv = document.getElementById('N')
+	let Ediv = document.getElementById('E')
+	let Wdiv = document.getElementById('W')
+	let Sdiv = document.getElementById('S')
 
 	let ctx = canvas.getContext('2d')
 	ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -68,30 +79,19 @@
 
 		let c = 0
 		for (let i in minimapData.mapData) {
-			/*if(i % 2 == 0) { // color code
-				for (let j in str[i]) {
-					ctx.fillStyle = colorize(Number(str[i][j]))
-					if (j < str[i].length - 1) {
-						ctx.fillRect((c % 21) * ratio, Math.floor(c / 21) * ratio, ratio, ratio)
-					}
-
-					c++
-				}
-			} else {
-				ctx.fillRect()
-			}
-			*/
 			ctx.fillStyle = colorize(Number(minimapData.mapData[i]))
 			ctx.fillRect((i % 21) * ratio, Math.floor(i / 21) * ratio, ratio, ratio)
 		}
 
-		/*ctx.font = '24px Minecraft'
-		ctx.fillStyle = '#FFFFFF'
-		ctx.textAlign = 'center'
-		ctx.fillText('E', HALF + HALF * Math.cos(yaw), HALF + HALF * Math.sin(yaw))
-		ctx.fillText('N', HALF + HALF * Math.cos(yaw + 0.5 * Math.PI), HALF + HALF * Math.sin(yaw + 0.5 * Math.PI))
-		ctx.fillText('W', HALF + HALF * Math.cos(yaw + Math.PI), HALF + HALF * Math.sin(yaw + Math.PI))
-		ctx.fillText('S', HALF + HALF * Math.cos(yaw + 1.5 * Math.PI), HALF + HALF * Math.sin(yaw + 1.5 * Math.PI))*/
+		let yaw = minimapData.yaw
+		Ediv.style.left = (HALF + HALF * Math.cos(yaw)) + 'px'
+		Ediv.style.top = (HALF + HALF * Math.sin(yaw) - BIAS) + 'px'
+		Ndiv.style.left = (HALF + HALF * Math.cos(yaw + 0.5 * Math.PI)) + 'px'
+		Ndiv.style.top = (HALF + HALF * Math.sin(yaw + 0.5 * Math.PI) - BIAS) + 'px'
+		Wdiv.style.left = (HALF + HALF * Math.cos(yaw + Math.PI)) + 'px'
+		Wdiv.style.top = (HALF + HALF * Math.sin(yaw + Math.PI) - BIAS) + 'px'
+		Sdiv.style.left = (HALF + HALF * Math.cos(yaw + 1.5 * Math.PI)) + 'px'
+		Sdiv.style.top = (HALF + HALF * Math.sin(yaw + 1.5 * Math.PI) - BIAS) + 'px'
 
 		ctx.restore()
 	}

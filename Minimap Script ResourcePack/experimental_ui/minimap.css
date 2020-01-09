@@ -20,9 +20,9 @@
 
 #player-indicator {
 	position: absolute;
-
-	top: 102px;
-	right: 104px;
+	left: 50%;
+	top: 50%;
+	transform: translateX(-50%) translateY(-50%);
 }
 
 .bright {
@@ -34,6 +34,14 @@
 	animation-name: brighten;
 	animation-duration: 0.5s;
 	animation-fill-mode: forwards;
+}
+
+.direction {
+	position: absolute;
+	
+	width: 12px;
+
+	font-size: 20px;
 }
 
 @keyframes brighten {
